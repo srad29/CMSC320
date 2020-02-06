@@ -1,0 +1,70 @@
+```{r knitr_setup, echo=FALSE}
+knitr::opts_chunk$set(cache=TRUE)
+```
+
+## Data types
+
+_1) Provide a URL to the dataset._
+
+I downloaded my dataset from https://query.data.world/s/7iysjzfn22qo5cgarzul2tv3wh6f3a
+https://www.kaggle.com/fmejia21/demographics-of-academy-awards-oscars-winners/data#Oscars-demographics-DFE.csv
+
+_2) Explain why you chose this dataset._ 
+
+I am interested in seeing how much the diversity of academy award winners has changed over the years, if it did.
+
+_3) What are the entities in this dataset? How many are there?_
+c
+Entities are Oscar winners' names. There are 441.
+
+_4) How many attributes are there in this dataset?_
+
+There are 27 attributes.
+
+_5) What is the datatype of each attribute (categorical -ordered or unordered-, numeric -discrete or continuous-, datetime, geolocation, other)? Write a short sentence stating how you determined the type of each attribute. Do this for at least 5 attributes, if your dataset contains more than 10 attributes, choose 10 of them to describe._
+
+| Num | Name | Type | Description |
+|-----|------|------|-------------|
+| 1 | `birthplace` | categorical unordered | Identifier of birthplace which takes values from finite set of possible birthplaces |
+| 2 | `date_of_birth` | DateTime | Birth dates are string values measured in time units |
+| 3 | `race_ethnicity` | categorical unordered | Can take value from finite set of possible races |
+| 4 | `religion` | categorical unordered | Can take value from finite set of possible religions |
+| 5 | `sexual_orientation` | categorical unordered | Identifies sexual orientation, taking values from a finite set of possible sexual orientations |
+| 6 | `year_of_award` | numerical discrete | Specifies exact year of receipt of award, which doesn't change |
+| 7 | `award` | categorical unordered | Street address of arrest |
+| 8 | `movie` | categorical unordered | Can take value from finite set of movies |
+| 9 | `person` | categorical unordered | Identifies person's name from a finite set |
+| 10 | `biourl` | categorical unordered | Can take value from finite set of URLs |
+
+_6) Write R code that loads the dataset using function `read_csv`. Were you able to load the data successfully? If no, why not?_
+For this site, I couldn't find a .csv URL so as a result I had to download the .csv file. The only way I could execute a command that properly pulls up the dataset is if I called read.csv and passed in the path where the downloaded file is as an argument (in this case my downloads folder). 
+```{r load_data, message=FALSE}
+library(tidyverse)
+
+Oscars_Demographics <- read.csv("~/Downloads/Oscars-demographics-DFE.csv")
+
+Oscars_Demographics %>% slice(1:10)
+```
+
+## Wrangling
+
+1) My pipeline finds and groups the earliest and most recent years of Oscar winners based on race, and orders the data based on which racial group won an award first.
+```{r pipeline}
+earliest_award <- Oscars_Demographics %>%
+  select(person, race_ethnicity, sexual_orientation, award, year_of_award) %>%
+  group_by(race_ethnicity) %>%
+  summarize(earliest=min(year_of_award), latest=max(year_of_award)) %>%
+  arrange(earliest)
+earliest_award
+```
+
+## Plotting
+
+1) This barplot shows the average arrest age per district (ignoring ages <= 0)
+
+```{r plot}
+mean_ages %>%
+  ggplot(aes(x=district, y=mean_age)) +
+    geom_bar(stat="identity") +
+    coord_flip()
+```
