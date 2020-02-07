@@ -6,15 +6,14 @@ knitr::opts_chunk$set(cache=TRUE)
 
 _1) Provide a URL to the dataset._
 
-I downloaded my dataset from https://query.data.world/s/7iysjzfn22qo5cgarzul2tv3wh6f3a
-https://www.kaggle.com/fmejia21/demographics-of-academy-awards-oscars-winners/data#Oscars-demographics-DFE.csv
+I downloaded my dataset from https://data.world/crowdflower/academy-awards-demographics
 
 _2) Explain why you chose this dataset._ 
 
 I am interested in seeing how much the diversity of academy award winners has changed over the years, if it did.
 
 _3) What are the entities in this dataset? How many are there?_
-c
+
 Entities are Oscar winners' names. There are 441.
 
 _4) How many attributes are there in this dataset?_
@@ -25,15 +24,15 @@ _5) What is the datatype of each attribute (categorical -ordered or unordered-, 
 
 | Num | Name | Type | Description |
 |-----|------|------|-------------|
-| 1 | `birthplace` | categorical unordered | Identifier of birthplace which takes values from finite set of possible birthplaces |
-| 2 | `date_of_birth` | DateTime | Birth dates are string values measured in time units |
+| 1 | `birthplace` | categorical unordered | Identifier of birthplace which takes values from finite set of possible birthplaces/cities (since there's not an infinite amount of cities) |
+| 2 | `date_of_birth` | DateTime | Birth dates are string values representing an exact date |
 | 3 | `race_ethnicity` | categorical unordered | Can take value from finite set of possible races |
 | 4 | `religion` | categorical unordered | Can take value from finite set of possible religions |
 | 5 | `sexual_orientation` | categorical unordered | Identifies sexual orientation, taking values from a finite set of possible sexual orientations |
 | 6 | `year_of_award` | numerical discrete | Specifies exact year of receipt of award, which doesn't change |
-| 7 | `award` | categorical unordered | Street address of arrest |
-| 8 | `movie` | categorical unordered | Can take value from finite set of movies |
-| 9 | `person` | categorical unordered | Identifies person's name from a finite set |
+| 7 | `award` | categorical unordered | Takes value from a limited set of types of awards won at the Oscars. |
+| 8 | `movie` | categorical unordered | Can take value from finite set of movie names |
+| 9 | `person` | categorical unordered | Identifies person's name from a finite set of names |
 | 10 | `biourl` | categorical unordered | Can take value from finite set of URLs |
 
 _6) Write R code that loads the dataset using function `read_csv`. Were you able to load the data successfully? If no, why not?_
@@ -42,13 +41,15 @@ For this site, I couldn't find a .csv URL so as a result I had to download the .
 library(tidyverse)
 
 Oscars_Demographics <- read.csv("~/Downloads/Oscars-demographics-DFE.csv")
+print(dim(Oscars_Demographics))
+print(Oscars_Demographics[1:10,1:10])
 
-Oscars_Demographics %>% slice(1:10)
+
 ```
 
 ## Wrangling
 
-1) My pipeline finds the distinct (making sure not to repeat count on those who won more than once) Oscar winners and groups them based on race, and orders the data based on which racial group won the most awards to the one who won the least number of awards.
+1) My pipeline finds the distinct (avoiding duplicates) Oscar winners and groups them based on race, and orders the data based on which racial group won the most awards to the one who won the least number of awards.
 ```{r pipeline}
 most_won <- Oscars_Demographics %>%
   select(person, race_ethnicity, sexual_orientation, award, year_of_award) %>%
@@ -60,11 +61,11 @@ most_won
 
 ## Plotting
 
-1) This barplot shows the number of Oscar winners for each racial group
+1) This barplot shows the number of (distinct) Oscar winners based on race.
 
 ```{r plot}
-mean_ages %>%
-  ggplot(aes(x=district, y=mean_age)) +
-    geom_bar(stat="identity") +
-    coord_flip()
+most_won %>%
+ ggplot(aes(x= race_ethnicity, y=num)) +
+ geom_bar(stat="identity") +
+ coord_flip()
 ```
