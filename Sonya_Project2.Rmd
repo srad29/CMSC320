@@ -1,0 +1,91 @@
+---
+title: 'Project 2: Wrangling and Exploratory Data Analysis'
+author: "Sonya Radichkova"
+date: "4/1/2020"
+output: html_document
+---
+Connecting to the database and loading r libraries
+```{r connect_db, include=FALSE}
+db <- DBI::dbConnect(RSQLite::SQLite(), "~/Downloads/lahman2016.sqlite")
+library(rvest)
+library(tidyverse)
+library(lubridate)
+```
+
+## Wrangling
+Problem 1:
+To compute total payroll and winning percentage, we must group by teamID and yearID in order to
+ensure payroll is grouped correctly for its corresponding team and year. I joined the Salaries and Teams tables on team and yearid so the final table is grouped correctly and so I could access the Team table's wins and number of games to calculate into the winning percentage.
+
+```{sql run_query, echo=TRUE, connection=db, eval=TRUE, output.var="payroll_df"}
+SELECT s.teamID, s.yearID, SUM(s.salary) as total_payroll, t.W, t.G, (cast(t.W as float) / cast(t.G as float)) * 100 as winning_percent, s.salary as sal, AVG(s.salary) as mean_payroll
+FROM Salaries as s
+INNER JOIN Teams as t
+ON t.teamID = s.teamID AND t.yearID = s.yearID
+WHERE s.yearID >=1990 AND s.yearID<=2014
+GROUP BY s.teamID , s.yearID, t.W, t.G
+ORDER BY s.teamID, s.yearID
+```
+
+
+
+
+## Exploratory Data Analysis
+# Payroll distribution
+Problem 2:
+```{r}
+payroll_df %>%
+  ggplot(mapping=aes(x=yearID, y=total_payroll, group=yearID)) +
+  geom_boxplot() +
+  labs(title = "Payroll Distribution") + ylab("Total Payroll") + xlab("Year")
+  
+```
+
+
+Question 1:
+Over time, the boxplot shows a more of a spread between the minimum and maximum along with the quartiles of each box becoming more spread out over time. There appear to be some more outliers starting from the 2000s that go beyond the box and whisker plots. The distribution of payrolls in the 2000s is more spread out than it was in the 1990s, so the spread will likely increase beyond 2015, while the central tendency of the data will increase at a very slow rate.
+
+Problem 3:
+I used the standard deviation function in order to observe the spread of teams' payrolls, which shows that there is still a relative increase in the spread of payroll among team players.
+```{r}
+payroll_df %>%
+  group_by(yearID) %>%
+  summarize(mean_pay=sd(sal)) %>%
+  ggplot(mapping=aes(x=yearID, y=mean_pay)) +
+  geom_bar(stat="identity") +
+  labs(title = "Payroll Spread") + ylab("Standard Deviation") + xlab("Year")
+```
+
+
+# Correlation Between Payroll and Winning Percentage
+Problem 4:
+```{r}
+  payroll_df %>%
+  
+  mutate(discrete_year=cut(yearID, breaks=5)) %>%
+  filter(year %in% c("1990","1995","2000", "2005", "2010")) %>%
+  ggplot(mapping=aes(x=mean_payroll, y=mean(winning_percent))) +
+  facet_grid(yearID)
+  geom_point()
+  
+```
+
+
+
+## Data Transformations
+# Standardization across years
+Problem 5:
+```{r}
+payroll_df %>%
+  mutate(standardized_payroll=)
+```
+
+
+#Expected Wins
+
+#Spending Efficiency
+
+
+```{r disconnectdb, include=FALSE}
+DBI::dbDisconnect(db)
+```
