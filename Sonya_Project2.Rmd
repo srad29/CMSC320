@@ -34,7 +34,7 @@ ORDER BY s.teamID, s.yearID
 Problem 2:
 I created a boxplot with the x representing the year and y representing total payroll, the boxplot helps to show the distribution of payroll across teams in a clear manner compared to if we simply did a scatter plot.
 
-```{r}
+```{r, echo=TRUE}
 payroll_df %>%
   ggplot(mapping=aes(x=yearID, y=total_payroll, group=yearID)) +
   geom_boxplot() +
@@ -48,7 +48,7 @@ Over time, the boxplot shows a more of a spread between the minimum and maximum 
 
 Problem 3:
 I used the standard deviation function in order to observe the spread of teams' payrolls, which shows that there is still a relative increase in the spread of payroll among team players.
-```{r}
+```{r, echo=TRUE}
 payroll_df %>%
   group_by(yearID) %>%
   summarize(mean_pay=sd(sal)) %>%
@@ -61,7 +61,7 @@ payroll_df %>%
 # Correlation Between Payroll and Winning Percentage
 Problem 4:
 I used mutate to create a new column with the year breaks, then made sure the data was grouped together by team and that discrete year group, and summarized average winning percent and average payroll based on those groupings in order to plot the data shown below.
-```{r}
+```{r, echo=TRUE}
 highlight <- payroll_df %>% 
   filter(teamID=="OAK")
   payroll_df %>%
@@ -83,7 +83,7 @@ Team payrolls have significantly spread out over time, and only later on does it
 # Standardization across years
 Problem 5:
 I directly modified the payroll dataframe to include a new column of the new formula which is the salary minus average payroll, and the data frame is already grouped on team and year so the calculations should be based on the given team and year, all of this divided by the standard deviation of the year as per the standardization formula.
-```{r}
+```{r, echo=TRUE}
 payroll_df<-payroll_df %>%
   mutate(standardized_payroll=(sal-mean_payroll)/sd(year)) 
 head(payroll_df)
@@ -93,7 +93,7 @@ Problem 6
 I specifically included breaks and labels in the mutate function because the grouped years weren't showing up the same as number 4 so I maually chose where to do the breaks and labeled them the way they were before to fix that issue. I made the stand_pay variable the mean of the standardized payroll (since a team will likely have more than 1 piece of data within a 5 year time period) in order for the standardized payroll to fall within its respective time frame.
 
 
-```{r}
+```{r, echo=TRUE}
 payroll_df %>%
   mutate(discrete_year=cut(yearID, breaks=c(1989, 1995, 2000, 2004, 2009, 2014), labels = c("(1990,1995]","(1995,2000]","(2000,2004]", "(2004,2009]", "(2009,2014]")))  %>%
   group_by(teamID, discrete_year) %>%
@@ -110,7 +110,7 @@ payroll_df %>%
 #Expected Wins
 Problem 7:
 Here we just use the ggplot function to plot the winning percent (y value) in relation to the standardized payroll (x) as points for a scatterplot, adding the regression line on top. 
-```{r}
+```{r, echo=TRUE}
 payroll_df %>%
   ggplot(mapping=aes(x=standardized_payroll, y=winning_percent)) +
   geom_point() +
@@ -120,6 +120,16 @@ payroll_df %>%
 
 #Spending Efficiency
 Problem 8:
+Did a mutate function containing the expected win percentage formula (expected_win_p) and plugged it into the efficiency formula
+```{r}
+f<-
+payroll_df %>%
+  mutate(expected_win_p=(50+(2.5 * standardized_payroll))) %>%
+  mutate(efficiency= (winning_percent-expected_win_p)) %>%
+  ggplot(mapping=aes(x=yearID, y=efficiency)) +
+  geom_point(mapping=aes(color=ifelse(teamID=="OAK", "red", "black"))) +
+  geom_smooth()
+```
 
 
 ```{r disconnectdb, include=FALSE}
