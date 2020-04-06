@@ -32,6 +32,8 @@ ORDER BY s.teamID, s.yearID
 ## Exploratory Data Analysis
 # Payroll distribution
 Problem 2:
+I created a boxplot with the x representing the year and y representing total payroll, the boxplot helps to show the distribution of payroll across teams in a clear manner compared to if we simply did a scatter plot.
+
 ```{r}
 payroll_df %>%
   ggplot(mapping=aes(x=yearID, y=total_payroll, group=yearID)) +
@@ -106,9 +108,18 @@ payroll_df %>%
  Seeing number 6's plot compared to number 4's shows the trendline going in the complete opposite direction, going downwards rather than upwards, and that the average winning percent doesn't appear to directly correlate to standardized payroll at all. There is less of a spread in the data, but the majority of the plots lie near the direct center, with the exception of the moneyball period, where winning percent was much more spread out. Through the course of these time periods, pay appears to increase while the winning percentage appears to slowly decrease.
 
 #Expected Wins
-Problem 7
+Problem 7:
+Here we just use the ggplot function to plot the winning percent (y value) in relation to the standardized payroll (x) as points for a scatterplot, adding the regression line on top. 
+```{r}
+payroll_df %>%
+  ggplot(mapping=aes(x=standardized_payroll, y=winning_percent)) +
+  geom_point() +
+  geom_smooth(method=lm)
+```
+
 
 #Spending Efficiency
+Problem 8:
 
 
 ```{r disconnectdb, include=FALSE}
